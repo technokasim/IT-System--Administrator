@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Records</title>
+</head>
+<body onload="fetchAndDisplayRecords()">
+  <button id="backBtn">Home</button>
+
+  <h1>All Records</h1>
+  <div id="recordsContainer">
+
+  </div>
+  
+  <script>
+function fetchAndDisplayRecords() {
+  fetch("/getRecords")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      const recordsContainer = document.getElementById("recordsContainer");
+      recordsContainer.innerHTML = "";
+
+      data.forEach(record => {
+        const recordDiv = document.createElement("div");
+        recordDiv.innerHTML = `<p><b>Name:</b> ${record.name}</p>
+                               <p><b>Phone Number:</b> ${record.phoneNumber}</p>
+                               <p><b>Email:</b> ${record.email}</p>
+                               <p><b>Capsule Name:</b> ${record.capsuleName}</p>
+                               <button onclick="removeRecord('${record._id}')">Remove</button>
+                               <button onclick="updateRecord('${record._id}', '${record.name}', '${record.phoneNumber}', '${record.email}', '${record.capsuleName}')">Update</button>`;
+        recordsContainer.appendChild(recordDiv);
+      });
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+}
+
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.location.href = "/";
+});
+
+function removeRecord(recordId) {
+  console.log(recordId);
+  fetch(`/removeRecord/${recordId}`, {
+    method: "DELETE",
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      fetchAndDisplayRecords(); 
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+}
+
+
+
+
+function updateRecord(recordId, name, phoneNumber, email, capsuleName) {
+  const updatedName = prompt("Enter updated name:", name);
+  const updatedPhoneNumber = prompt("Enter updated phone number:", phoneNumber);
+  const updatedEmail = prompt("Enter updated email:", email);
+  const updatedCapsuleName = prompt("Enter updated capsule name:", capsuleName);
+
+  const updatedRecord = {
+    name: updatedName,
+    phoneNumber: updatedPhoneNumber,
+    email: updatedEmail,
+    capsuleName: updatedCapsuleName,
+  };
+
+  fetch(`/updateRecord/${recordId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedRecord),
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+
+      fetchAndDisplayRecords(); 
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+}
+  </script>
+</body>
+</html>
